@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: insider-threat-api
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r ../requirements.txt
+    startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT --proxy-headers
+    healthCheckPath: /healthz
+    autoDeploy: true
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: DB_URL
+        sync: false
+      - key: SECRET_KEY
+        generateValue: true
+      - key: CORS_ORIGINS
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: BREVO_API_KEY
+        sync: false
+      - key: ANALYST_EMAIL
+        sync: false

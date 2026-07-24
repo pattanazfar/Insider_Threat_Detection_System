@@ -1,0 +1,97 @@
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+!**/.env.example
+secrets/
+credentials*.json
+service-account*.json
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Database dumps, local databases, and potentially sensitive datasets
+*.sql
+*.sql.gz
+*.dump
+*.bak
+*.sqlite
+*.sqlite3
+*.db
+data/
+datasets/
+exports/
+uploads/
+*.csv
+*.tsv
+*.parquet
+
+# Python environments, caches, test output, and packaging artifacts
+.venv/
+.venv*/
+venv/
+venv*/
+env/
+.security-test-venv/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.nox/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+build/
+dist/
+*.egg-info/
+pip-wheel-metadata/
+
+# JavaScript dependencies, caches, and build output
+node_modules/
+dist/
+dist-ssr/
+.vite/
+.npm/
+.yarn/
+.pnpm-store/
+*.tsbuildinfo
+
+# Runtime logs and temporary files
+logs/
+*.log
+*.pid
+*.tmp
+*.temp
+*.swp
+*.swo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Hosting and local tooling state
+.netlify/
+.vercel/
+.render/
+.agents/
+.codex/
+.claude/
+
+# Editors and IDEs
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Operating-system metadata
+.DS_Store
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
