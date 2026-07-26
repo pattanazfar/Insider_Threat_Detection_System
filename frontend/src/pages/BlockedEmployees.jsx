@@ -74,17 +74,8 @@ useEffect(() => {
           </h1>
         </div>
 
-        <div className="flex w-full shrink-0 items-center justify-between gap-2 sm:w-auto sm:justify-start sm:gap-4">
-          <button
-            onClick={() => navigate("/dashboard")}
-            className="rounded-lg bg-blue-500 px-3 py-2 text-sm text-white sm:px-4 sm:text-base"
-          >
-            ← Back
-          </button>
-
-          <div className="hidden sm:block">
-            <AdminAvatar />
-          </div>
+        <div className="hidden shrink-0 sm:block">
+          <AdminAvatar />
         </div>
       </div>
 
