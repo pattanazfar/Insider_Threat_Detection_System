@@ -206,11 +206,11 @@ const getIndicator = (u) => {
     >
       {/* HEADER */}
       <div
-        className={`flex flex-col gap-3 border-b px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-4
+        className={`sticky top-0 z-40 flex shrink-0 flex-col gap-3 border-b px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-4
       backdrop-blur-xl ${
         darkMode
-          ? "bg-gradient-to-r from-[#0f172a]/80 via-[#1e293b]/70 to-[#0f172a]/80 border-white/10 shadow-lg"
-          : "bg-white shadow"
+          ? "bg-gradient-to-r from-[#0f172a]/95 via-[#1e293b]/95 to-[#0f172a]/95 border-white/10 shadow-lg"
+          : "bg-white/95 shadow"
       }`}
       >
         <div className="flex min-w-0 items-center gap-3 sm:gap-4">
