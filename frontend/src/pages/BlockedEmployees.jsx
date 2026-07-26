@@ -1,52 +1,68 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import api from "../utils/api";
+import { useLocation, useNavigate } from "react-router-dom";
 import AdminAvatar from "../components/AdminAvatar";
+import api from "../utils/api";
 
 export default function BlockedEmployees() {
   const navigate = useNavigate();
   const location = useLocation();
+  const cachedBlockedList = location.state?.blockedList;
 
-  const [data, setData] = useState([]);
+  const [data, setData] = useState(cachedBlockedList || []);
+  const [loading, setLoading] = useState(!cachedBlockedList);
   const [search, setSearch] = useState("");
-const [darkMode, setDarkMode] = useState(() => {
-  return localStorage.getItem("theme") === "light" ? false : true;
-});
+  const [darkMode, setDarkMode] = useState(() => localStorage.getItem("theme") !== "light");
 
   useEffect(() => {
     localStorage.setItem("theme", darkMode ? "dark" : "light");
   }, [darkMode]);
 
-  // 📡 Fetch blocked employees
   const fetchData = async () => {
     try {
-      const res = await api.get("/api/blocked");
-      setData(res.data);
-    } catch (err) {
-      console.log(err);
+      setLoading(true);
+      const response = await api.get("/api/blocked");
+      setData(response.data);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
     }
   };
 
-useEffect(() => {
-  let mounted = true;
+  useEffect(() => {
+    let mounted = true;
 
-  const load = async () => {
-    try {
-      const res = await api.get("/api/blocked");
-      if (mounted) setData(res.data);
-    } catch (err) {
-      console.log(err);
-    }
-  };
+    const load = async () => {
+      if (cachedBlockedList) {
+        setLoading(false);
+        return;
+      }
 
-  load();
+      try {
+        if (mounted) {
+          setLoading(true);
+        }
 
-  return () => {
-    mounted = false;
-  };
-}, []);
+        const response = await api.get("/api/blocked");
+        if (mounted) {
+          setData(response.data);
+        }
+      } catch (error) {
+        console.log(error);
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    };
 
-  // 🔓 Unblock
+    load();
+
+    return () => {
+      mounted = false;
+    };
+  }, [cachedBlockedList]);
+
   const handleUnblock = async (employee) => {
     await api.delete(`/api/unblock/${employee}`);
     fetchData();
@@ -66,11 +82,10 @@ useEffect(() => {
           : "bg-gray-100 text-gray-800"
       }`}
     >
-      {/* HEADER */}
       <div
         className={`sticky top-0 z-40 flex shrink-0 flex-col items-stretch justify-between gap-3 border-b px-4 py-3 backdrop-blur-xl sm:flex-row sm:items-center sm:px-6 sm:py-4 ${
           darkMode
-            ? "bg-gradient-to-r from-[#0f172a]/95 to-[#1e293b]/95 border-white/10"
+            ? "border-white/10 bg-gradient-to-r from-[#0f172a]/95 to-[#1e293b]/95"
             : "bg-white/95 shadow"
         }`}
       >
@@ -85,8 +100,8 @@ useEffect(() => {
           <div
             className={`flex min-w-0 flex-1 items-center rounded-full border px-4 py-2 sm:w-64 ${
               darkMode
-                ? "bg-[#0f172a]/60 border-white/10 focus-within:border-blue-400"
-                : "bg-gray-100 border-gray-200"
+                ? "border-white/10 bg-[#0f172a]/60 focus-within:border-blue-400"
+                : "border-gray-200 bg-gray-100"
             }`}
           >
             <input
@@ -106,19 +121,22 @@ useEffect(() => {
       </div>
 
       <div className="flex flex-1 flex-col xl:min-h-0 xl:flex-row">
-        {/* SIDEBAR */}
         <div
           className={`order-last sticky bottom-0 z-30 flex w-full shrink-0 flex-row items-center justify-between border-t px-3 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] backdrop-blur-xl xl:order-none xl:h-auto xl:w-20 xl:flex-col xl:border-t-0 xl:px-0 xl:py-6 ${
             darkMode
-              ? "bg-[#020617]/95 border-white/10"
-              : "bg-white/95 border-gray-200 shadow-lg"
+              ? "border-white/10 bg-[#020617]/95"
+              : "border-gray-200 bg-white/95 shadow-lg"
           }`}
         >
           <div className="flex flex-row items-center gap-2 xl:flex-col xl:gap-6">
             <SidebarIcon
               src="/home.svg"
               label="Dashboard"
-              onClick={() => navigate("/dashboard")}
+              onClick={() =>
+                navigate("/dashboard", {
+                  state: { blockedList: data },
+                })
+              }
               darkMode={darkMode}
             />
 
@@ -126,7 +144,11 @@ useEffect(() => {
               src="/blocked.svg"
               label="Blocked employees"
               active={location.pathname === "/BlockedEmployees"}
-              onClick={() => navigate("/BlockedEmployees")}
+              onClick={() =>
+                navigate("/BlockedEmployees", {
+                  state: { blockedList: data },
+                })
+              }
               darkMode={darkMode}
             />
 
@@ -151,11 +173,21 @@ useEffect(() => {
           />
         </div>
 
-        {/* MAIN CONTENT */}
         <main className="min-w-0 flex-1 overflow-y-auto p-4 pb-24 sm:p-6 sm:pb-28 xl:pb-6">
-          <h2 className="mb-4 text-xl font-semibold sm:mb-6">Blocked Employees 🚫</h2>
+          <h2 className="mb-4 text-xl font-semibold sm:mb-6">Blocked Employees</h2>
 
-          {data.length === 0 ? (
+          {loading ? (
+            <div
+              className={`flex items-center gap-3 rounded-xl border px-4 py-4 ${
+                darkMode ? "border-white/10 bg-white/5" : "border-gray-200 bg-white shadow-sm"
+              }`}
+            >
+              <div className="h-5 w-5 animate-spin rounded-full border-2 border-blue-400 border-t-transparent" />
+              <p className={darkMode ? "text-slate-300" : "text-slate-600"}>
+                Loading blocked employees...
+              </p>
+            </div>
+          ) : data.length === 0 ? (
             <p className="text-gray-400">No blocked employees</p>
           ) : filteredEmployees.length === 0 ? (
             <p className="text-gray-400">
@@ -163,43 +195,45 @@ useEffect(() => {
             </p>
           ) : (
             <div className="grid gap-4">
-              {filteredEmployees.map((emp, i) => (
+              {filteredEmployees.map((employee, index) => (
                 <div
-                  key={emp.employee || i}
+                  key={employee.employee || index}
                   role="button"
                   tabIndex={0}
-                  onClick={() => navigate(`/employee/${emp.employee}`)}
+                  onClick={() =>
+                    navigate(`/employee/${employee.employee}`, {
+                      state: { blockedList: data },
+                    })
+                  }
                   onKeyDown={(event) => {
                     if (event.key === "Enter" || event.key === " ") {
                       event.preventDefault();
-                      navigate(`/employee/${emp.employee}`);
+                      navigate(`/employee/${employee.employee}`, {
+                        state: { blockedList: data },
+                      });
                     }
                   }}
                   className={`flex cursor-pointer flex-col items-stretch gap-4 rounded-xl p-4 transition-colors sm:flex-row sm:items-center sm:justify-between ${
                     darkMode
                       ? "bg-[#1c2333] hover:bg-[#252e42]"
-                      : "bg-white shadow border border-gray-200 hover:bg-gray-50"
+                      : "border border-gray-200 bg-white shadow hover:bg-gray-50"
                   }`}
                 >
-                  {/* LEFT */}
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center">
-                      🚫
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-500 text-white">
+                      X
                     </div>
 
                     <div>
-                      <h3 className="font-semibold">{emp.employee}</h3>
-                      <p className="text-sm text-gray-400">
-                        Blocked Employee
-                      </p>
+                      <h3 className="font-semibold">{employee.employee}</h3>
+                      <p className="text-sm text-gray-400">Blocked Employee</p>
                     </div>
                   </div>
 
-                  {/* RIGHT */}
                   <button
                     onClick={(event) => {
                       event.stopPropagation();
-                      handleUnblock(emp.employee);
+                      handleUnblock(employee.employee);
                     }}
                     className="w-full rounded-lg bg-green-600 px-4 py-2 text-white hover:bg-green-500 sm:w-auto"
                   >
@@ -215,18 +249,17 @@ useEffect(() => {
   );
 }
 
-/* SIDEBAR ICON */
 function SidebarIcon({ src, label, active, onClick, danger, darkMode }) {
   return (
     <button
       type="button"
       aria-label={label}
       onClick={onClick}
-      className={`flex h-11 w-11 items-center justify-center rounded-xl cursor-pointer transition-all md:h-12 md:w-12 xl:h-14 xl:w-14 ${
+      className={`flex h-11 w-11 cursor-pointer items-center justify-center rounded-xl transition-all md:h-12 md:w-12 xl:h-14 xl:w-14 ${
         active
           ? darkMode
-            ? "bg-blue-500 scale-110"
-            : "bg-gray-200 shadow-md scale-110"   // ✅ FIX HERE
+            ? "scale-110 bg-blue-500"
+            : "scale-110 bg-gray-200 shadow-md"
           : darkMode
           ? "hover:bg-white/10"
           : "hover:bg-gray-200"
@@ -237,7 +270,7 @@ function SidebarIcon({ src, label, active, onClick, danger, darkMode }) {
         alt=""
         width="24"
         height="24"
-        className={`w-6 h-6 ${darkMode ? "invert" : "opacity-70"}`}
+        className={`h-6 w-6 ${darkMode ? "invert" : "opacity-70"}`}
       />
     </button>
   );
