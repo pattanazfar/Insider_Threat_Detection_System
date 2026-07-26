@@ -8,6 +8,7 @@ export default function BlockedEmployees() {
   const location = useLocation();
 
   const [data, setData] = useState([]);
+  const [search, setSearch] = useState("");
 const [darkMode, setDarkMode] = useState(() => {
   return localStorage.getItem("theme") === "light" ? false : true;
 });
@@ -51,6 +52,12 @@ useEffect(() => {
     fetchData();
   };
 
+  const filteredEmployees = data.filter((employee) =>
+    String(employee.employee || "")
+      .toLowerCase()
+      .includes(search.trim().toLowerCase())
+  );
+
   return (
     <div
       className={`flex min-h-[100dvh] flex-col xl:h-screen xl:overflow-hidden ${
@@ -61,10 +68,10 @@ useEffect(() => {
     >
       {/* HEADER */}
       <div
-        className={`flex flex-col items-stretch justify-between gap-3 border-b px-4 py-3 sm:flex-row sm:items-center sm:px-6 sm:py-4 ${
+        className={`sticky top-0 z-40 flex shrink-0 flex-col items-stretch justify-between gap-3 border-b px-4 py-3 backdrop-blur-xl sm:flex-row sm:items-center sm:px-6 sm:py-4 ${
           darkMode
-            ? "bg-gradient-to-r from-[#0f172a] to-[#1e293b] border-white/10"
-            : "bg-white shadow"
+            ? "bg-gradient-to-r from-[#0f172a]/95 to-[#1e293b]/95 border-white/10"
+            : "bg-white/95 shadow"
         }`}
       >
         <div className="flex min-w-0 items-center gap-3 sm:gap-4">
@@ -74,8 +81,27 @@ useEffect(() => {
           </h1>
         </div>
 
-        <div className="hidden shrink-0 sm:block">
-          <AdminAvatar />
+        <div className="flex w-full items-center gap-3 sm:w-auto sm:gap-4">
+          <div
+            className={`flex min-w-0 flex-1 items-center rounded-full border px-4 py-2 sm:w-64 ${
+              darkMode
+                ? "bg-[#0f172a]/60 border-white/10 focus-within:border-blue-400"
+                : "bg-gray-100 border-gray-200"
+            }`}
+          >
+            <input
+              type="search"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search Blocked Employee"
+              aria-label="Search blocked employees"
+              className="w-full min-w-0 bg-transparent text-sm outline-none"
+            />
+          </div>
+
+          <div className="hidden shrink-0 sm:block">
+            <AdminAvatar />
+          </div>
         </div>
       </div>
 
@@ -131,15 +157,28 @@ useEffect(() => {
 
           {data.length === 0 ? (
             <p className="text-gray-400">No blocked employees</p>
+          ) : filteredEmployees.length === 0 ? (
+            <p className="text-gray-400">
+              No blocked employees match &quot;{search.trim()}&quot;
+            </p>
           ) : (
             <div className="grid gap-4">
-              {data.map((emp, i) => (
+              {filteredEmployees.map((emp, i) => (
                 <div
-                  key={i}
-                  className={`flex flex-col items-stretch gap-4 rounded-xl p-4 sm:flex-row sm:items-center sm:justify-between ${
+                  key={emp.employee || i}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => navigate(`/employee/${emp.employee}`)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      navigate(`/employee/${emp.employee}`);
+                    }
+                  }}
+                  className={`flex cursor-pointer flex-col items-stretch gap-4 rounded-xl p-4 transition-colors sm:flex-row sm:items-center sm:justify-between ${
                     darkMode
-                      ? "bg-[#1c2333]"
-                      : "bg-white shadow border border-gray-200"
+                      ? "bg-[#1c2333] hover:bg-[#252e42]"
+                      : "bg-white shadow border border-gray-200 hover:bg-gray-50"
                   }`}
                 >
                   {/* LEFT */}
@@ -158,7 +197,10 @@ useEffect(() => {
 
                   {/* RIGHT */}
                   <button
-                    onClick={() => handleUnblock(emp.employee)}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      handleUnblock(emp.employee);
+                    }}
                     className="w-full rounded-lg bg-green-600 px-4 py-2 text-white hover:bg-green-500 sm:w-auto"
                   >
                     Unblock
