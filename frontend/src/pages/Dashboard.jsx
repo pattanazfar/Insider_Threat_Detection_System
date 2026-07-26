@@ -248,8 +248,8 @@ const getIndicator = (u) => {
       <div className="flex flex-1 flex-col xl:min-h-0 xl:flex-row xl:overflow-hidden">
         {/* SIDEBAR */}
         <div
-          className={`flex h-16 w-full shrink-0 flex-row items-center justify-between border-b px-3 py-2 xl:h-auto xl:w-20 xl:flex-col xl:border-b-0 xl:border-r xl:px-0 xl:py-6
-        ${darkMode ? "bg-[#020617] border-white/10" : "bg-white shadow-lg"}`}
+          className={`order-last sticky bottom-0 z-30 flex w-full shrink-0 flex-row items-center justify-between border-t px-3 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] backdrop-blur-xl xl:order-none xl:h-auto xl:w-20 xl:flex-col xl:border-t-0 xl:border-r xl:px-0 xl:py-6
+        ${darkMode ? "bg-[#020617]/95 border-white/10" : "bg-white/95 border-gray-200 shadow-lg"}`}
         >
           <div className="flex flex-row items-center gap-2 xl:flex-col xl:gap-6">
             <SidebarIcon
@@ -290,7 +290,7 @@ const getIndicator = (u) => {
         </div>
 
         {/* MAIN */}
-        <main className="flex min-w-0 flex-1 flex-col p-4 sm:p-6 xl:h-full xl:min-h-0 xl:overflow-hidden">
+        <main className="flex min-w-0 flex-1 flex-col p-4 pb-24 sm:p-6 sm:pb-28 xl:h-full xl:min-h-0 xl:overflow-hidden xl:pb-6">
           {/* CARDS */}
           <div className="mb-4 grid grid-cols-2 gap-3 sm:mb-6 sm:gap-4 xl:grid-cols-4">
             <Card title="Total Employees" value={uniqueEmployees.length} darkMode={darkMode} />
@@ -416,7 +416,7 @@ function SidebarIcon({ src, label, active, onClick, darkMode, danger }) {
       type="button"
       aria-label={label}
       onClick={onClick}
-      className={`flex h-11 w-11 items-center justify-center rounded-xl cursor-pointer transition-all duration-300 xl:h-14 xl:w-14
+      className={`flex h-11 w-11 items-center justify-center rounded-xl cursor-pointer transition-all duration-300 md:h-12 md:w-12 xl:h-14 xl:w-14
       ${
         active
           ? darkMode

@@ -91,10 +91,10 @@ useEffect(() => {
       <div className="flex flex-1 flex-col xl:min-h-0 xl:flex-row">
         {/* SIDEBAR */}
         <div
-          className={`flex h-16 w-full shrink-0 flex-row items-center justify-between border-b px-3 py-2 xl:h-auto xl:w-20 xl:flex-col xl:border-b-0 xl:px-0 xl:py-6 ${
+          className={`order-last sticky bottom-0 z-30 flex w-full shrink-0 flex-row items-center justify-between border-t px-3 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] backdrop-blur-xl xl:order-none xl:h-auto xl:w-20 xl:flex-col xl:border-t-0 xl:px-0 xl:py-6 ${
             darkMode
-              ? "bg-[#020617]"
-              : "bg-white border-r border-gray-200"
+              ? "bg-[#020617]/95 border-white/10"
+              : "bg-white/95 border-gray-200 shadow-lg"
           }`}
         >
           <div className="flex flex-row items-center gap-2 xl:flex-col xl:gap-6">
@@ -135,7 +135,7 @@ useEffect(() => {
         </div>
 
         {/* MAIN CONTENT */}
-        <main className="min-w-0 flex-1 overflow-y-auto p-4 sm:p-6">
+        <main className="min-w-0 flex-1 overflow-y-auto p-4 pb-24 sm:p-6 sm:pb-28 xl:pb-6">
           <h2 className="mb-4 text-xl font-semibold sm:mb-6">Blocked Employees 🚫</h2>
 
           {data.length === 0 ? (
@@ -189,7 +189,7 @@ function SidebarIcon({ src, label, active, onClick, danger, darkMode }) {
       type="button"
       aria-label={label}
       onClick={onClick}
-      className={`flex h-11 w-11 items-center justify-center rounded-xl cursor-pointer transition-all xl:h-14 xl:w-14 ${
+      className={`flex h-11 w-11 items-center justify-center rounded-xl cursor-pointer transition-all md:h-12 md:w-12 xl:h-14 xl:w-14 ${
         active
           ? darkMode
             ? "bg-blue-500 scale-110"
