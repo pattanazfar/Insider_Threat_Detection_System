@@ -15,7 +15,7 @@ This system processes employee-behavior data. Deploy only with authorization, da
 3. Enforce HTTPS at Netlify, Render, and the database. Use a least-privilege database account and do not expose the database publicly except to the backend's allowed network path.
 4. Keep database backups encrypted and test restoration. Retain audit logs in a protected central log system; Render stdout logs alone are not a durable audit store.
 5. Set a unique `SEED_ADMIN_PASSWORD`, run the admin seed once, then remove that variable from the deployment environment. Restrict administrator access and implement MFA through an identity provider before handling real data.
-6. Configure `BREVO_API_KEY`, a verified Brevo sender in `ADMIN_EMAIL`, and the intended recipient in `ANALYST_EMAIL`. Email is sent through Brevo's HTTPS API, so no SMTP port is required.
+6. Configure `BREVO_API_KEY`, a verified Brevo sender in `MAIL_FROM_EMAIL`, an optional display name in `MAIL_FROM_NAME`, and the intended recipient in `ANALYST_EMAIL`. `ADMIN_EMAIL` is supported only as a fallback for older deployments. Email is sent through Brevo's HTTPS API, so no SMTP port is required.
 7. Put rate limiting, a web-application firewall, DDoS protection, monitoring, alerting, vulnerability scanning, and incident-response procedures at the hosting layer.
 8. After upgrading scikit-learn, retrain and validate the included model artifacts before release; serialized ML models are version-sensitive.
 

@@ -25,6 +25,7 @@ class EmailNotificationTests(unittest.TestCase):
             {
                 "BREVO_API_KEY": "test-brevo-key",
                 "ADMIN_EMAIL": "verified-sender@example.com",
+                "MAIL_FROM_NAME": "InsiderSentinel",
                 "ANALYST_EMAIL": "analyst@example.com",
             },
         ):
@@ -40,7 +41,10 @@ class EmailNotificationTests(unittest.TestCase):
                 "content-type": "application/json",
             },
             json={
-                "sender": {"email": "verified-sender@example.com"},
+                "sender": {
+                    "name": "InsiderSentinel",
+                    "email": "verified-sender@example.com",
+                },
                 "to": [{"email": "analyst@example.com"}],
                 "subject": "Employee ABC123 Assigned for Review",
                 "textContent": (
@@ -58,6 +62,7 @@ class EmailNotificationTests(unittest.TestCase):
             {
                 "BREVO_API_KEY": "",
                 "ADMIN_EMAIL": "",
+                "MAIL_FROM_EMAIL": "",
                 "ANALYST_EMAIL": "",
             },
         ):
@@ -82,12 +87,38 @@ class EmailNotificationTests(unittest.TestCase):
             os.environ,
             {
                 "BREVO_API_KEY": "test-brevo-key",
-                "ADMIN_EMAIL": "unverified@example.com",
+                "MAIL_FROM_EMAIL": "unverified@example.com",
+                "MAIL_FROM_NAME": "InsiderSentinel",
                 "ANALYST_EMAIL": "analyst@example.com",
             },
         ):
             with self.assertRaises(EmailDeliveryError):
                 send_email("ABC123", "Review")
+
+    @patch("api.assign_routes.httpx.Client")
+    def test_mail_from_email_takes_priority_over_admin_email(self, client_class):
+        with patch.dict(
+            os.environ,
+            {
+                "BREVO_API_KEY": "test-brevo-key",
+                "ADMIN_EMAIL": "old-sender@example.com",
+                "MAIL_FROM_EMAIL": "notifications@insidersentinel.live",
+                "MAIL_FROM_NAME": "InsiderSentinel",
+                "ANALYST_EMAIL": "analyst@example.com",
+            },
+        ):
+            send_email("ABC123", "Review unusual activity")
+
+        client = client_class.return_value.__enter__.return_value
+        client.post.assert_called_once()
+        _, kwargs = client.post.call_args
+        self.assertEqual(
+            kwargs["json"]["sender"],
+            {
+                "name": "InsiderSentinel",
+                "email": "notifications@insidersentinel.live",
+            },
+        )
 
 
 if __name__ == "__main__":

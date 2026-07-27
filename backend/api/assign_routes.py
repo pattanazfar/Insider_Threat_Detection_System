@@ -20,14 +20,15 @@ class EmailDeliveryError(RuntimeError):
 
 def send_email(employee: str, note: str) -> None:
     api_key = os.getenv("BREVO_API_KEY")
-    sender = os.getenv("ADMIN_EMAIL")
+    sender = os.getenv("MAIL_FROM_EMAIL") or os.getenv("ADMIN_EMAIL")
+    sender_name = os.getenv("MAIL_FROM_NAME", "InsiderSentinel").strip() or "InsiderSentinel"
     recipient = os.getenv("ANALYST_EMAIL")
     if not all((api_key, sender, recipient)):
         logger.warning("Email notification is not configured")
         raise EmailDeliveryError("Email notification is not configured")
 
     payload = {
-        "sender": {"email": sender},
+        "sender": {"name": sender_name, "email": sender},
         "to": [{"email": recipient}],
         "subject": f"Employee {employee} Assigned for Review",
         "textContent": f"Employee: {employee}\n\nAdmin Note:\n{note}\n",
@@ -71,7 +72,7 @@ def assign_to_analyst(req: AssignRequest, user=Depends(require_admin)):
             status_code=502,
             detail=(
                 "Email could not be sent. Check the Brevo API key and verify "
-                "ADMIN_EMAIL as a Brevo sender."
+                "the configured sender email as a Brevo sender."
             ),
         ) from exc
 

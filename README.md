@@ -43,6 +43,8 @@ CORS_ORIGINS=http://localhost:5173
 SEED_ADMIN_USERNAME=your_admin_username
 SEED_ADMIN_PASSWORD=replace-with-a-strong-unique-password
 ADMIN_EMAIL=verified-sender@example.com
+MAIL_FROM_NAME=InsiderSentinel
+MAIL_FROM_EMAIL=notifications@insidersentinel.live
 BREVO_API_KEY=replace-with-your-real-brevo-api-key
 ANALYST_EMAIL=analyst@example.com
 ```
@@ -112,10 +114,14 @@ generated-data state.
 
 ## Email notifications
 
-The backend sends assignment notifications with Brevo's HTTPS API. `ADMIN_EMAIL`
-must be a sender verified in Brevo, `ANALYST_EMAIL` is the recipient, and
-`BREVO_API_KEY` must contain the real API key. The API key belongs only in the
-local `.env` file and Render environment settings.
+The backend sends assignment notifications with Brevo's HTTPS API.
+`MAIL_FROM_EMAIL` is the preferred sender address and should be set to your
+authenticated domain mailbox such as `notifications@insidersentinel.live`.
+`MAIL_FROM_NAME` controls the display name shown in the analyst inbox.
+`ADMIN_EMAIL` remains as a backward-compatible fallback if `MAIL_FROM_EMAIL`
+is not set. `ANALYST_EMAIL` is the recipient, and `BREVO_API_KEY` must contain
+the real API key. The API key belongs only in the local `.env` file and Render
+environment settings.
 
 The assign endpoint returns success only after Brevo accepts the message.
 Delivery failures return an error to the dashboard and are recorded in backend
@@ -128,8 +134,9 @@ logs without exposing addresses, message content, or the key.
 1. Push the repository to GitHub.
 2. In Render, create a Blueprint from the repository. `render.yaml` configures
    the backend service.
-3. Set `DB_URL`, `CORS_ORIGINS`, `ADMIN_EMAIL`, `BREVO_API_KEY`, and
-   `ANALYST_EMAIL` in Render.
+3. Set `DB_URL`, `CORS_ORIGINS`, `MAIL_FROM_NAME`, `MAIL_FROM_EMAIL`,
+   `BREVO_API_KEY`, and `ANALYST_EMAIL` in Render. Keep `ADMIN_EMAIL` only if
+   you want the legacy fallback.
 4. Set `CORS_ORIGINS` to the exact Netlify URL and custom-domain URL, separated
    as supported by the application configuration.
 5. Deploy, seed the administrator once, and verify `/healthz`.
@@ -155,7 +162,7 @@ current limits before production use.
 
 - Replace all example values with strong, unique secrets.
 - Use only HTTPS origins and database TLS.
-- Keep the Brevo sender verified and test an analyst notification.
+- Keep `MAIL_FROM_EMAIL` verified in Brevo and test an analyst notification.
 - Restrict database privileges and retain protected backups.
 - Review [SECURITY.md](SECURITY.md) before using real employee data.
 - Run frontend lint/build and backend tests before every release.
